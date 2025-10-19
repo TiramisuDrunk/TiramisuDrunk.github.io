@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生成绩管理系统</title>
+    <!-- 使用本地Bootstrap CSS -->
+    <link href="./local-resources/bootstrap.min.css" rel="stylesheet">
+    <!-- 使用本地Font Awesome或移除图标 -->
+    <style>
+        /* 添加基本的图标样式作为备用 */
+        .fas::before {
+            content: "▪";
+            margin-right: 5px;
+        }
+        .fa-graduation-cap::before { content: "🎓"; }
+        .fa-home::before { content: "🏠"; }
+        .fa-sign-in-alt::before { content: "🔑"; }
+        .fa-user-plus::before { content: "👤"; }
+        .fa-chart-line::before { content: "📈"; }
+        .fa-user-graduate::before { content: "🎓"; }
+        .fa-clipboard-list::before { content: "📋"; }
+        .fa-chart-bar::before { content: "📊"; }
+        .fa-plus-circle::before { content: "➕"; }
+        .fa-edit::before { content: "✏️"; }
+        .fa-trash-alt::before { content: "🗑️"; }
+        .fa-sync-alt::before { content: "🔄"; }
+    </style>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #34495e;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            margin-bottom: 20px;
+            border: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-container {
+            padding: 20px;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .modal-content {
+            border-radius: 10px;
+        }
+
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        .action-buttons .btn {
+            margin: 0 5px;
+        }
+
+        .feature-card {
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .active-menu {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+
+        .alert-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<!-- 导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <i class="fas fa-graduation-cap me-2"></i>学生成绩管理系统
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="homeLink"><i class="fas fa-home me-1"></i>首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="loginLink"><i class="fas fa-sign-in-alt me-1"></i>登录</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" id="registerLink"><i class="fas fa-user-plus me-1"></i>注册</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 首页内容 -->
+<div id="homePage" class="container main-container">
+    <div class="welcome-section">
+        <h1>欢迎使用学生成绩管理系统</h1>
+        <p class="lead">高效管理学生成绩，助力教学决策</p>
+        <button class="btn btn-light btn-lg mt-3" id="startUsingBtn">开始使用</button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>成绩分析</h4>
+                <p>全面分析学生成绩数据，生成可视化报告</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="feature-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h4>学生管理</h4>
+                <p>管理学生信息，跟踪学习进度</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="feature-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h4>成绩统计</h4>
+                <p>自动计算平均分、最高分、最低分等统计指标</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 登录页面 -->
+<div id="loginPage" class="container" style="display: none;">
+    <div class="login-container">
+        <h2 class="text-center mb-4">用户登录</h2>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">用户名</label>
+                <input type="text" class="form-control" id="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">密码</label>
+                <input type="password" class="form-control" id="password" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">登录</button>
+            </div>
+            <div class="text-center mt-3">
+                <a href="#" id="toRegister">没有账号？立即注册</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 注册页面 -->
+<div id="registerPage" class="container" style="display: none;">
+    <div class="login-container">
+        <h2 class="text-center mb-4">用户注册</h2>
+        <form id="registerForm">
+            <div class="mb-3">
+                <label for="regUsername" class="form-label">用户名</label>
+                <input type="text" class="form-control" id="regUsername" required>
+            </div>
+            <div class="mb-3">
+                <label for="regPassword" class="form-label">密码</label>
+                <input type="password" class="form-control" id="regPassword" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">确认密码</label>
+                <input type="password" class="form-control" id="confirmPassword" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success">注册</button>
+            </div>
+            <div class="text-center mt-3">
+                <a href="#" id="toLogin">已有账号？立即登录</a>
+            </div>
+        </form>
+        <div class="loading-spinner" id="registerLoading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">注册中...</span>
+            </div>
+            <p class="mt-2">注册中，请稍候...</p>
+        </div>
+    </div>
+</div>
+
+<!-- 主功能页面 -->
+<div id="mainPage" class="container main-container" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>成绩管理面板</h2>
+        <div>
+            <span class="me-3">欢迎，<strong id="currentUser">管理员</strong></span>
+            <button class="btn btn-outline-secondary" id="logoutBtn">退出登录</button>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card feature-card" data-feature="scoreAnalyse">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-bar feature-icon"></i>
+                    <h5 class="card-title">成绩分析</h5>
+                    <p class="card-text">查看成绩统计与分析</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card" data-feature="addScore">
+                <div class="card-body text-center">
+                    <i class="fas fa-plus-circle feature-icon"></i>
+                    <h5 class="card-title">新增成绩</h5>
+                    <p class="card-text">添加学生成绩记录</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card" data-feature="updateScore">
+                <div class="card-body text-center">
+                    <i class="fas fa-edit feature-icon"></i>
+                    <h5 class="card-title">修改成绩</h5>
+                    <p class="card-text">更新已有成绩记录</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card feature-card" data-feature="deleteScore">
+                <div class="card-body text-center">
+                    <i class="fas fa-trash-alt feature-icon"></i>
+                    <h5 class="card-title">删除成绩</h5>
+                    <p class="card-text">删除成绩记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成绩分析区域 -->
+    <div id="scoreAnalyseSection" class="table-container" style="display: none;">
+        <h4>成绩分析结果</h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>班级</th>
+                    <th>课程</th>
+                    <th>最高分</th>
+                    <th>最低分</th>
+                    <th>平均分</th>
+                </tr>
+                </thead>
+                <tbody id="scoreAnalyseTable">
+                <!-- 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 成绩列表区域 -->
+    <div id="scoreListSection" class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>所有成绩记录</h4>
+            <button class="btn btn-primary" id="refreshScoresBtn">
+                <i class="fas fa-sync-alt me-1"></i>刷新数据
+            </button>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>学生姓名</th>
+                    <th>班级</th>
+                    <th>课程</th>
+                    <th>成绩</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="scoreTable">
+                <!-- 动态生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 新增成绩模态框 -->
+<div class="modal fade" id="addScoreModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">新增成绩</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addScoreForm">
+                    <div class="mb-3">
+                        <label for="studentName" class="form-label">学生姓名</label>
+                        <input type="text" class="form-control" id="studentName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clazzName" class="form-label">班级名称</label>
+                        <input type="text" class="form-control" id="clazzName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="course" class="form-label">课程名称</label>
+                        <input type="text" class="form-control" id="course" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="score" class="form-label">成绩</label>
+                        <input type="number" class="form-control" id="score" min="0" max="100" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveScoreBtn">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修改成绩模态框 -->
+<div class="modal fade" id="updateScoreModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">修改成绩</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateScoreForm">
+                    <input type="hidden" id="updateScoreId">
+                    <div class="mb-3">
+                        <label class="form-label">学生姓名</label>
+                        <p class="form-control-plaintext" id="updateStudentName"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">课程</label>
+                        <p class="form-control-plaintext" id="updateCourse"></p>
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateScore" class="form-label">成绩</label>
+                        <input type="number" class="form-control" id="updateScore" min="0" max="100" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="updateScoreBtn">更新</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">确认删除</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>确定要删除这条成绩记录吗？</p>
+                <div class="alert alert-warning">
+                    <strong>学生：</strong><span id="deleteStudentName"></span><br>
+                    <strong>课程：</strong><span id="deleteCourse"></span><br>
+                    <strong>成绩：</strong><span id="deleteScore"></span>
+                </div>
+                <p class="text-danger">此操作不可撤销！</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="text-center">
+    <div class="container">
+        <p>&copy; rg 2302第三组 学生成绩管理系统. </p>
+        <p>网页成绩系统</p>
+    </div>
+</footer>
+
+<!-- 消息提示容器 -->
+<div id="messageContainer" class="alert-message"></div>
+
+<!-- 使用本地Bootstrap JS -->
+<script src="./local-resources/bootstrap.bundle.min.js"></script>
+<script>
+    // 模拟数据
+    const mockScores = [
+        { id: 1, studentName: "张", clazzName: "1班", course: "Java程序设计", score: 85 },
+        { id: 2, studentName: "李", clazzName: "1班", course: "Java程序设计", score: 92 },
+        { id: 3, studentName: "王", clazzName: "2班", course: "Java程序设计", score: 78 },
+        { id: 4, studentName: "赵", clazzName: "2班", course: "数据库原理", score: 88 },
+        { id: 5, studentName: "钱", clazzName: "1班", course: "数据库原理", score: 95 }
+    ];
+
+    const mockAnalysis = [
+        { clazzName: "1班", course: "Java程序设计", maxScore: 92, minScore: 85, avgScore: 88.5 },
+        { clazzName: "2班", course: "Java程序设计", maxScore: 78, minScore: 78, avgScore: 78 },
+        { clazzName: "1班", course: "数据库原理", maxScore: 95, minScore: 95, avgScore: 95 },
+        { clazzName: "2班", course: "数据库原理", maxScore: 88, minScore: 88, avgScore: 88 }
+    ];
+
+    // 模拟用户数据库
+    let users = JSON.parse(localStorage.getItem('users') || '[]');
+
+    // DOM元素
+    const homePage = document.getElementById('homePage');
+    const loginPage = document.getElementById('loginPage');
+    const registerPage = document.getElementById('registerPage');
+    const mainPage = document.getElementById('mainPage');
+    const scoreTable = document.getElementById('scoreTable');
+    const scoreAnalyseTable = document.getElementById('scoreAnalyseTable');
+    const scoreAnalyseSection = document.getElementById('scoreAnalyseSection');
+    const scoreListSection = document.getElementById('scoreListSection');
+    const messageContainer = document.getElementById('messageContainer');
+    const registerLoading = document.getElementById('registerLoading');
+
+    // 显示消息函数
+    function showMessage(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        messageContainer.appendChild(alertDiv);
+
+        // 3秒后自动消失
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 3000);
+    }
+
+    // 页面切换函数
+    function showPage(page) {
+        homePage.style.display = 'none';
+        loginPage.style.display = 'none';
+        registerPage.style.display = 'none';
+        mainPage.style.display = 'none';
+
+        page.style.display = 'block';
+    }
+
+    // 模拟后端注册函数
+    function registerUser(username, password) {
+        return new Promise((resolve, reject) => {
+            // 模拟网络延迟
+            setTimeout(() => {
+                // 检查用户是否已存在
+                const existingUser = users.find(user => user.username === username);
+                if (existingUser) {
+                    reject('用户名已存在！');
+                    return;
+                }
+
+                // 添加新用户
+                users.push({ username, password });
+                localStorage.setItem('users', JSON.stringify(users));
+                resolve('注册成功！');
+            }, 1500);
+        });
+    }
+
+    // 模拟后端登录函数
+    function loginUser(username, password) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const user = users.find(user => user.username === username && user.password === password);
+                if (user) {
+                    resolve('登录成功！');
+                } else {
+                    reject('用户名或密码错误！');
+                }
+            }, 1000);
+        });
+    }
+
+    // 初始化页面
+    document.addEventListener('DOMContentLoaded', function() {
+        showPage(homePage);
+        renderScoreTable();
+        renderScoreAnalyse();
+
+        // 导航链接事件
+        document.getElementById('homeLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage(homePage);
+        });
+
+        document.getElementById('loginLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage(loginPage);
+        });
+
+        document.getElementById('registerLink').addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage(registerPage);
+        });
+
+        document.getElementById('startUsingBtn').addEventListener('click', function() {
+            showPage(loginPage);
+        });
+
+        document.getElementById('toRegister').addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage(registerPage);
+        });
+
+        document.getElementById('toLogin').addEventListener('click', function(e) {
+            e.preventDefault();
+            showPage(loginPage);
+        });
+
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username && password) {
+                loginUser(username, password)
+                    .then(message => {
+                        document.getElementById('currentUser').textContent = username;
+                        showPage(mainPage);
+                        showMessage(message, 'success');
+                    })
+                    .catch(error => {
+                        showMessage(error, 'danger');
+                    });
+            } else {
+                showMessage('请输入用户名和密码！', 'warning');
+            }
+        });
+
+        // 注册表单提交
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showMessage('两次输入的密码不一致！', 'warning');
+                return;
+            }
+
+            if (username.length < 1) {
+                showMessage('用户名至少需要1个字符！', 'warning');
+                return;
+            }
+
+            if (password.length < 1) {
+                showMessage('密码至少需要1个字符！', 'warning');
+                return;
+            }
+
+            // 显示加载状态
+            registerLoading.style.display = 'block';
+            document.querySelector('#registerForm button[type="submit"]').disabled = true;
+
+            registerUser(username, password)
+                .then(message => {
+                    showMessage(message, 'success');
+                    document.getElementById('registerForm').reset();
+                    showPage(loginPage);
+                })
+                .catch(error => {
+                    showMessage(error, 'danger');
+                })
+                .finally(() => {
+                    // 隐藏加载状态
+                    registerLoading.style.display = 'none';
+                    document.querySelector('#registerForm button[type="submit"]').disabled = false;
+                });
+        });
+
+        // 退出登录
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            showPage(homePage);
+            showMessage('已退出登录', 'info');
+        });
+
+        // 功能卡片点击事件
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const feature = this.getAttribute('data-feature');
+
+                // 重置所有区域显示状态
+                scoreAnalyseSection.style.display = 'none';
+                scoreListSection.style.display = 'none';
+
+                switch(feature) {
+                    case 'scoreAnalyse':
+                        scoreAnalyseSection.style.display = 'block';
+                        scoreListSection.style.display = 'none';
+                        break;
+                    case 'addScore':
+                        const addModal = new bootstrap.Modal(document.getElementById('addScoreModal'));
+                        addModal.show();
+                        break;
+                    case 'updateScore':
+                        showMessage('请先从成绩列表中选择要修改的记录', 'info');
+                        scoreListSection.style.display = 'block';
+                        break;
+                    case 'deleteScore':
+                        showMessage('请先从成绩列表中选择要删除的记录', 'info');
+                        scoreListSection.style.display = 'block';
+                        break;
+                }
+            });
+        });
+
+        // 刷新数据
+        document.getElementById('refreshScoresBtn').addEventListener('click', function() {
+            renderScoreTable();
+            renderScoreAnalyse();
+            showMessage('数据已刷新！', 'success');
+        });
+
+        // 保存成绩
+        document.getElementById('saveScoreBtn').addEventListener('click', function() {
+            const studentName = document.getElementById('studentName').value;
+            const clazzName = document.getElementById('clazzName').value;
+            const course = document.getElementById('course').value;
+            const score = document.getElementById('score').value;
+
+            if (studentName && clazzName && course && score) {
+                // 模拟添加到数据
+                mockScores.push({
+                    id: mockScores.length + 1,
+                    studentName,
+                    clazzName,
+                    course,
+                    score: parseInt(score)
+                });
+
+                // 关闭模态框
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addScoreModal'));
+                modal.hide();
+
+                // 重置表单
+                document.getElementById('addScoreForm').reset();
+
+                // 刷新表格
+                renderScoreTable();
+                renderScoreAnalyse();
+
+                showMessage('成绩添加成功！', 'success');
+            } else {
+                showMessage('请填写所有字段！', 'warning');
+            }
+        });
+
+        // 更新成绩
+        document.getElementById('updateScoreBtn').addEventListener('click', function() {
+            const id = document.getElementById('updateScoreId').value;
+            const newScore = document.getElementById('updateScore').value;
+
+            if (newScore) {
+                // 模拟更新数据
+                const index = mockScores.findIndex(score => score.id == id);
+                if (index !== -1) {
+                    mockScores[index].score = parseInt(newScore);
+                }
+
+                // 关闭模态框
+                const modal = bootstrap.Modal.getInstance(document.getElementById('updateScoreModal'));
+                modal.hide();
+
+                // 刷新表格
+                renderScoreTable();
+                renderScoreAnalyse();
+
+                showMessage('成绩更新成功！', 'success');
+            } else {
+                showMessage('请输入新成绩！', 'warning');
+            }
+        });
+
+        // 确认删除
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            const id = document.getElementById('confirmDeleteBtn').getAttribute('data-id');
+
+            // 模拟删除数据
+            const index = mockScores.findIndex(score => score.id == id);
+            if (index !== -1) {
+                mockScores.splice(index, 1);
+            }
+
+            // 关闭模态框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+            modal.hide();
+
+            // 刷新表格
+            renderScoreTable();
+            renderScoreAnalyse();
+
+            showMessage('成绩删除成功！', 'success');
+        });
+    });
+
+    // 渲染成绩表格
+    function renderScoreTable() {
+        scoreTable.innerHTML = '';
+
+        mockScores.forEach(score => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${score.id}</td>
+                    <td>${score.studentName}</td>
+                    <td>${score.clazzName}</td>
+                    <td>${score.course}</td>
+                    <td>${score.score}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="${score.id}">
+                            <i class="fas fa-edit"></i> 修改
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="${score.id}">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </td>
+                `;
+            scoreTable.appendChild(row);
+        });
+
+        // 添加修改按钮事件
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const score = mockScores.find(s => s.id == id);
+
+                if (score) {
+                    document.getElementById('updateScoreId').value = score.id;
+                    document.getElementById('updateStudentName').textContent = score.studentName;
+                    document.getElementById('updateCourse').textContent = score.course;
+                    document.getElementById('updateScore').value = score.score;
+
+                    const modal = new bootstrap.Modal(document.getElementById('updateScoreModal'));
+                    modal.show();
+                }
+            });
+        });
+
+        // 添加删除按钮事件
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const score = mockScores.find(s => s.id == id);
+
+                if (score) {
+                    document.getElementById('deleteStudentName').textContent = score.studentName;
+                    document.getElementById('deleteCourse').textContent = score.course;
+                    document.getElementById('deleteScore').textContent = score.score;
+                    document.getElementById('confirmDeleteBtn').setAttribute('data-id', id);
+
+                    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                    modal.show();
+                }
+            });
+        });
+    }
+
+    // 渲染成绩分析表格
+    function renderScoreAnalyse() {
+        scoreAnalyseTable.innerHTML = '';
+
+        mockAnalysis.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${item.clazzName}</td>
+                    <td>${item.course}</td>
+                    <td>${item.maxScore}</td>
+                    <td>${item.minScore}</td>
+                    <td>${item.avgScore.toFixed(2)}</td>
+                `;
+            scoreAnalyseTable.appendChild(row);
+        });
+    }
+</script>
+</body>
+</html>
